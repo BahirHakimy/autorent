@@ -1,11 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
-    <h1>Hello World</h1>
-  </body>
-</html>
+{% extends 'layout.html' %} {% load static %} {% block header%}
+<nav
+  class="bg-white dark:bg-gray-900 fixed w-full z-20 top-0 left-0 border-b border-gray-200 dark:border-gray-600"
+>
+  <div
+    class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"
+  >
+    <a href="https://flowbite.com/" class="flex items-center">
+      <img
+        src="{% static 'images/logo.png' %}"
+        class="h-8 mr-3"
+        alt="Site Logo"
+      />
+      <span
+        class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
+        >AutoRent</span
+      >
+    </a>
+    <div class="flex md:order-2">
+      <button
+        type="button"
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      >
+        My Dashboard
+      </button>
+      
+    </div>
+    
+    </div>
+  </div>
+</nav>
+{%endblock%} {% block content%} 
+<div class='w-full flex items-center justify-center h-screen'>
+  <form class="mt-8 flex items-center border-2 rounded-md text-slate-700">
+    <div class='flex justify-center items-center p-4'>
+      <i class="fa-solid fa-location-dot"></i>
+      <div class="relative flex items-center"> 
+        <input class="rounded-md border-none active:border-none peer outline-none" type="text" name="pickup-location" id="pickup-location">
+        <label for="pickup-location" class="absolute ml-2 font-bold peer-focus:-translate-y-full peer-focus:scale-75 peer-focus:-translate-x-4 transition-transform">Pickup Location</label>
+      </div>
+    </div>
+    <div class='flex justify-center items-center p-4'>
+      <i class="fa-solid fa-clock"></i>
+      <div class="relative flex items-center"> 
+        <input class="rounded-md border-none active:border-none peer outline-none" type="date" name="pickup-date" id="pickup-date">
+        <label for="pickup-date" class="absolute ml-2 font-bold peer-focus:-translate-y-full peer-focus:scale-75 peer-focus:-translate-x-4 transition-transform">Pickup Date</label>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% comment %}
+<div class="">
+  {% endcomment %} {% comment %}
+  <div id="map"></div>
+  {% endcomment %} {% comment %}
+</div>
+{% endcomment %} {% comment %}
+<script src="{% static 'scripts/map.js' %}"></script>
+{% endcomment %} {%endblock%}

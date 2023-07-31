@@ -6,9 +6,12 @@ from django.conf import settings
 import random
 
 
-class User(AbstractUser):
-    email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=12)
+class CustomUser(AbstractUser):
+    email = models.EmailField(blank=False, null=False, unique=True)
+    phone_number = models.CharField(max_length=12, blank=True)
+
+    class Meta:
+        swappable = "AUTH_USER_MODEL"
 
     def send_email(self):
         subject = "Hello from Django!"
@@ -41,6 +44,7 @@ class Car(models.Model):
     )
 
     car_type = models.CharField(choices=CAR_TYPES, max_length=10)
+    image = models.ImageField(upload_to="cars/", blank=True)
     model = models.CharField(max_length=100)
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
     price_per_km = models.DecimalField(max_digits=10, decimal_places=2)
@@ -66,8 +70,10 @@ class Booking(models.Model):
         ("completed", "Completed"),
         ("canceled", "Canceled"),
     )
-    booking_number = models.CharField(default=random.randint(10000000, 99999999))
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    booking_number = models.CharField(
+        max_length=8, default=random.randint(10000000, 99999999)
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
     pick_up_location = models.CharField(max_length=200)
     drop_off_location = models.CharField(max_length=200)
@@ -76,7 +82,9 @@ class Booking(models.Model):
     booking_type = models.CharField(max_length=10, choices=BOOKING_OPTIONS)
     booking_amount = models.DecimalField(max_digits=10, decimal_places=5)
     total_cost = models.DecimalField(max_digits=10, decimal_places=2)
-    booking_status = models.CharField(choices=BOOKING_STATUS, default="active")
+    booking_status = models.CharField(
+        max_length=10, choices=BOOKING_STATUS, default="active"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -91,7 +99,7 @@ class Review(models.Model):
         (4, "4"),
         (5, "5"),
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
     rating = models.IntegerField(choices=RATING_CHOICES)
     comment = models.TextField()
