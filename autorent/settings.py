@@ -15,6 +15,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-#0z@kvg1o4epk)4ae#$lano^3nw-emw#%zd4(m#40pbn+f6-6+"
 
+JWT_EXPIRATION_TIME_SECONDS = 86400
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -53,15 +55,10 @@ ROOT_URLCONF = "autorent.urls"
 
 WSGI_APPLICATION = "autorent.wsgi.application"
 
-TAILWIND_APP_NAME = "theme"
+AUTH_USER_MODEL = "authentication.CustomUser"
 
-AUTH_USER_MODEL = "core.CustomUser"
 
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
-
-NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"
+CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5173", "http://localhost:5173"]
 
 # Application definition
 
@@ -72,22 +69,27 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "tailwind",
-    "theme",
-    "django_browser_reload",
+    "corsheaders",
+    "rest_framework",
     "core.apps.CoreConfig",
+    "authentication.apps.AuthenticationConfig",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": ("authentication.backends.JWTAuthentication",),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
