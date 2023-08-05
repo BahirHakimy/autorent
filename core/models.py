@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 import random
+from django.utils import timezone
 
 
 class Car(models.Model):
@@ -19,13 +20,26 @@ class Car(models.Model):
     number_of_seats = models.IntegerField()
 
     def check_availability(self, from_date, to_date):
-        is_available = True
+        is_available = False
+        from_date = timezone.make_aware(from_date, timezone.get_default_timezone())
+        to_date = timezone.make_aware(to_date, timezone.get_default_timezone())
         for booking in self.booking_set.filter(booking_status="active"):
-            if from_date < booking.booked_from and to_date > booking.booked_from:
-                is_available = False
-            elif from_date < booking.booked_until:
-                is_available = False
+            if from_date < booking.booked_from and to_date < booking.booked_from:
+                is_available = True
+            elif from_date > booking.booked_until and to_date > booking.booked_until:
+                is_available = True
         return is_available
+
+    def get_average_rating(self):
+        reviews = self.review_set.all()
+        total = 0
+        for review in reviews:
+            total += review.rating
+
+        if reviews.count() > 0:
+            return f"{total / reviews.count():.2f}"
+        else:
+            return "N/A"
 
     def __str__(self):
         return f"{self.model} - {self.car_type}"

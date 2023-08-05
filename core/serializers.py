@@ -5,7 +5,7 @@ from authentication.serializers import UserSerializer
 
 
 class CarSerializer(serializers.ModelSerializer):
-    # car_type = serializers.ReadOnlyField(source="get_car_type_display")
+    rating = serializers.ReadOnlyField(source="get_average_rating")
     image = serializers.ImageField(use_url=True)
 
     class Meta:
@@ -19,6 +19,7 @@ class CarSerializer(serializers.ModelSerializer):
             "price_per_hour",
             "price_per_km",
             "number_of_seats",
+            "rating",
         ]
 
 

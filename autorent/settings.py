@@ -34,7 +34,7 @@ EMAIL_HOST_PASSWORD = "your_email_password"
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Kabul"
 
 USE_I18N = True
 
@@ -88,7 +88,7 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("authentication.backends.JWTAuthentication",),
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
 }
 
 # Database
