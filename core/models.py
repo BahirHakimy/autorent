@@ -23,11 +23,17 @@ class Car(models.Model):
         is_available = False
         from_date = timezone.make_aware(from_date, timezone.get_default_timezone())
         to_date = timezone.make_aware(to_date, timezone.get_default_timezone())
-        for booking in self.booking_set.filter(booking_status="active"):
-            if from_date < booking.booked_from and to_date < booking.booked_from:
-                is_available = True
-            elif from_date > booking.booked_until and to_date > booking.booked_until:
-                is_available = True
+        bookings = self.booking_set.filter(booking_status="active")
+        if bookings.exists():
+            for booking in bookings:
+                if from_date < booking.booked_from and to_date < booking.booked_from:
+                    is_available = True
+                elif (
+                    from_date > booking.booked_until and to_date > booking.booked_until
+                ):
+                    is_available = True
+        else:
+            is_available = True
         return is_available
 
     def get_average_rating(self):
@@ -39,7 +45,7 @@ class Car(models.Model):
         if reviews.count() > 0:
             return f"{total / reviews.count():.2f}"
         else:
-            return "N/A"
+            return None
 
     def __str__(self):
         return f"{self.model} - {self.car_type}"

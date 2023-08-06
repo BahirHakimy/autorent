@@ -17,12 +17,12 @@ class CarViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"], permission_classes=[AllowAny])
     def search(self, request, *args, **kwargs):
-        pickup = request.data["pickup_date"]
-        dropoff = request.data["dropoff_date"]
+        pickup = request.data["pickup_datetime"]
+        dropoff = request.data["dropoff_datetime"]
         pickup_datetime = datetime.strptime(pickup, "%Y-%m-%dT%H:%M")
         dropoff_datetime = datetime.strptime(dropoff, "%Y-%m-%dT%H:%M")
-        pick_up_location = request.data["pickup"]
-        drop_off_location = request.data["dropoff"]
+        pick_up_location = request.data["pickup_location"]
+        drop_off_location = request.data["dropoff_location"]
         cars = self.get_queryset()
         available_cars = [
             car
@@ -32,6 +32,7 @@ class CarViewSet(viewsets.ModelViewSet):
         serialized = CarSerializer(
             available_cars, many=True, context={"request": request}
         )
+
         return Response(serialized.data)
 
 
