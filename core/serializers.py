@@ -24,8 +24,8 @@ class CarSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
-    user = UserSerializer(many=False)
-    car = CarSerializer(many=False)
+    user = UserSerializer()
+    car = CarSerializer()
     booking_type = serializers.ReadOnlyField(source="get_booking_type_display")
     booking_status = serializers.ReadOnlyField(source="get_booking_status_display")
 
@@ -47,9 +47,28 @@ class BookingSerializer(serializers.ModelSerializer):
         ]
 
 
+class BookingCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = [
+            "booking_number",
+            "user",
+            "car",
+            "pick_up_location",
+            "drop_off_location",
+            "booked_from",
+            "booked_until",
+            "booking_type",
+            "booking_amount",
+            "total_cost",
+            "booking_status",
+            "created_at",
+        ]
+
+
 class ReviewSerializer(serializers.ModelSerializer):
-    user = UserSerializer(many=False)
-    car = CarSerializer(many=False)
+    user = UserSerializer(read_only=True)
+    car = CarSerializer(read_only=True)
     rating = serializers.ReadOnlyField(source="get_rating_display")
 
     class Meta:

@@ -23,11 +23,12 @@ class Car(models.Model):
         is_available = False
         from_date = timezone.make_aware(from_date, timezone.get_default_timezone())
         to_date = timezone.make_aware(to_date, timezone.get_default_timezone())
-        bookings = self.booking_set.filter(booking_status="active")
+        bookings = self.booking_set.filter(booking_status__in=["idle", "active"])
         if bookings.exists():
             for booking in bookings:
                 if from_date < booking.booked_from and to_date < booking.booked_from:
                     is_available = True
+
                 elif (
                     from_date > booking.booked_until and to_date > booking.booked_until
                 ):
@@ -54,6 +55,7 @@ class Car(models.Model):
 class Booking(models.Model):
     BOOKING_OPTIONS = (("days", "By Days"), ("distance", "By Distance"))
     BOOKING_STATUS = (
+        ("idle", "Idle"),
         ("active", "Active"),
         ("completed", "Completed"),
         ("canceled", "Canceled"),
@@ -68,10 +70,10 @@ class Booking(models.Model):
     booked_from = models.DateTimeField()
     booked_until = models.DateTimeField()
     booking_type = models.CharField(max_length=10, choices=BOOKING_OPTIONS)
-    booking_amount = models.DecimalField(max_digits=10, decimal_places=5)
+    booking_amount = models.DecimalField(max_digits=10, decimal_places=2)
     total_cost = models.DecimalField(max_digits=10, decimal_places=2)
     booking_status = models.CharField(
-        max_length=10, choices=BOOKING_STATUS, default="active"
+        max_length=10, choices=BOOKING_STATUS, default="idle"
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

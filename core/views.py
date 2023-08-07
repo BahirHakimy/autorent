@@ -1,5 +1,6 @@
 from datetime import datetime
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from rest_framework.permissions import AllowAny
 from .models import Car, Booking, Review
 from .serializers import (
     BookingSerializer,
+    BookingCreateSerializer,
     CarSerializer,
     ReviewSerializer,
 )
@@ -40,29 +42,30 @@ class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
-    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
-    def book(self, request):
-        stripe.api_key = settings.STRIPE_KEY
+    def create(self, request):
+        User = get_user_model()
+        user_email = request.data["email"]
+        car_id = request.data["car_id"]
         pickup = request.data["pickup_datetime"]
         dropoff = request.data["dropoff_datetime"]
+        user = User.objects.get(email=user_email)
         pickup_datetime = datetime.strptime(pickup, "%Y-%m-%dT%H:%M")
         dropoff_datetime = datetime.strptime(dropoff, "%Y-%m-%dT%H:%M")
-        chargeType = request.data["chargeType"]
-        selected_car_id = request.data["selectedCar"]
-        booking_amount = request.data["booking_amount"]
-        tota_cost: request.data["tota_cost"]
-        email: request.data["email"]
-        payment_method_id: request.data["payment_method_id"]
-
-        customer = stripe.Customer.create(email=email, payment_method=payment_method_id)
-
-        stripe.PaymentIntent.create(
-            customer=customer,
-            payment_method=payment_method_id,
-            currency="usd",
-            amount=tota_cost * 100,
-            confirm=True,
+        serializer = BookingCreateSerializer(
+            data={
+                **request.data,
+                "booked_from": pickup_datetime,
+                "booked_until": dropoff_datetime,
+                "user": user.id,
+                "car": car_id,
+            }
         )
+        if serializer.is_valid():
+            print("valid")
+            serializer.save()
+            print(serializer.data)
+        else:
+            print(serializer.errors)
         return Response({})
 
 
