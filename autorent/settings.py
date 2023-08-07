@@ -14,6 +14,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-#0z@kvg1o4epk)4ae#$lano^3nw-emw#%zd4(m#40pbn+f6-6+"
+STRIPE_KEY = "sk_test_51NcOaFB1Lcz9jTJ0hBKio5dJVN20M6UscSJEMiYcLtZkGcD3ssH7NlvSohwiMJ5jA1vQENpN8QwTzcO74K1BkFp500uPa71wCB"
 
 JWT_EXPIRATION_TIME_SECONDS = 86400
 
