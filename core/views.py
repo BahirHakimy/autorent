@@ -5,7 +5,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from .models import Car, Booking, Review
+from rest_framework import status
+from rest_framework.generics import GenericAPIView
+from .models import Car, Booking, Review, Payment
 from .serializers import (
     BookingSerializer,
     BookingCreateSerializer,
@@ -60,13 +62,38 @@ class BookingViewSet(viewsets.ModelViewSet):
                 "car": car_id,
             }
         )
-        if serializer.is_valid():
-            print("valid")
-            serializer.save()
-            print(serializer.data)
-        else:
-            print(serializer.errors)
-        return Response({})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=["post"])
+    def payment(self, request):
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        booking_id = request.data["booking_id"]
+        booking = Booking.objects.get(id=booking_id)
+        try:
+            intent = stripe.PaymentIntent.create(
+                amount=int(booking.total_cost * 100),
+                currency="usd",
+            )
+            return Response({"client_secret": intent.client_secret})
+        except Exception as e:
+            return Response({"error": str(e)})
+
+    @action(detail=False, methods=["post"])
+    def create_payment(self, request):
+        booking_id = request.data["booking_id"]
+        booking = Booking.objects.get(id=booking_id)
+        payment_data = request.data["paymentIntent"]
+        payment = Payment.objects.create(
+            booking=booking,
+            payment_id=payment_data["id"],
+            amount=(payment_data["amount"] / 100),
+        )
+        payment.save()
+        booking.booking_status = "active"
+        booking.save()
+        return Response({"message": "Payment created successfully"})
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

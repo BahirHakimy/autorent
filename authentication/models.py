@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.mail import EmailMultiAlternatives
@@ -15,17 +16,15 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 
-    def send_email(self):
-        subject = "Hello from Django!"
+    def send_email(self, booking):
+        subject = "Booking Confirmation"
         from_email = settings.EMAIL_HOST_USER
         recipient_list = [self.email]
 
-        # Plain Text Version
-        text_message = "This is a test email sent using Django. (Plain Text)"
-
-        # HTML Version
+        text_message = f"This email confirms that your booking with #{booking.booking_number} number was created successfully."
+        time = datetime.now().strftime("%b, %e %Y - %I:%M:%S")
         html_message = render_to_string(
-            "email/booking_confirmation.html", {"variable": "value"}
+            "email/Booking_Confirm.html", {"booking": booking, "time": time}
         )
 
         # Create the EmailMultiAlternatives object

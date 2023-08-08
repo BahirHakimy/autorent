@@ -1,7 +1,9 @@
 from django.db import models
 from django.conf import settings
-import random
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+import random
 
 
 class Car(models.Model):
@@ -20,22 +22,23 @@ class Car(models.Model):
     number_of_seats = models.IntegerField()
 
     def check_availability(self, from_date, to_date):
-        is_available = False
         from_date = timezone.make_aware(from_date, timezone.get_default_timezone())
         to_date = timezone.make_aware(to_date, timezone.get_default_timezone())
         bookings = self.booking_set.filter(booking_status__in=["idle", "active"])
-        if bookings.exists():
-            for booking in bookings:
-                if from_date < booking.booked_from and to_date < booking.booked_from:
-                    is_available = True
 
-                elif (
-                    from_date > booking.booked_until and to_date > booking.booked_until
-                ):
-                    is_available = True
-        else:
-            is_available = True
-        return is_available
+        if not bookings.exists():
+            return True
+
+        for booking in bookings:
+            if (
+                (from_date >= booking.booked_from and from_date < booking.booked_until)
+                or (to_date > booking.booked_from and to_date <= booking.booked_until)
+                or (
+                    from_date <= booking.booked_from and to_date >= booking.booked_until
+                )
+            ):
+                return False
+        return True
 
     def get_average_rating(self):
         reviews = self.review_set.all()
@@ -102,6 +105,15 @@ class Review(models.Model):
 class Payment(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
     payment_id = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.booking
+        return f"{self.booking.id} {self.amount}"
+
+
+@receiver(post_save, sender=Payment)
+def send_confirmation_email(sender, instance, created, **kwargs):
+    if created:
+        user = instance.booking.user
+        user.send_email(instance.booking)

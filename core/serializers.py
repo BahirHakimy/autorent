@@ -32,6 +32,7 @@ class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = [
+            "id",
             "booking_number",
             "user",
             "car",

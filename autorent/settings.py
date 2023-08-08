@@ -14,7 +14,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-#0z@kvg1o4epk)4ae#$lano^3nw-emw#%zd4(m#40pbn+f6-6+"
-STRIPE_KEY = "sk_test_51NcOaFB1Lcz9jTJ0hBKio5dJVN20M6UscSJEMiYcLtZkGcD3ssH7NlvSohwiMJ5jA1vQENpN8QwTzcO74K1BkFp500uPa71wCB"
+STRIPE_SECRET_KEY = "sk_test_51NcOaFB1Lcz9jTJ0hBKio5dJVN20M6UscSJEMiYcLtZkGcD3ssH7NlvSohwiMJ5jA1vQENpN8QwTzcO74K1BkFp500uPa71wCB"
 
 JWT_EXPIRATION_TIME_SECONDS = 86400
 
@@ -26,8 +26,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "your_email@gmail.com"
-EMAIL_HOST_PASSWORD = "your_email_password"
+EMAIL_HOST_USER = "bahirhakimy2015@gmail.com"
+EMAIL_HOST_PASSWORD = "gdsunesznrfhagpm"
 
 
 # Internationalization
