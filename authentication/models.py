@@ -17,8 +17,8 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = ["username"]
 
     def send_email(self, booking):
-        subject = "Booking Confirmation"
-        from_email = settings.EMAIL_HOST_USER
+        subject = "Booking Confirmed"
+        from_email = "AutoRent Rentals"
         recipient_list = [self.email]
 
         text_message = f"This email confirms that your booking with #{booking.booking_number} number was created successfully."

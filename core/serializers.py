@@ -73,7 +73,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     rating = serializers.ReadOnlyField(source="get_rating_display")
 
     class Meta:
-        model = Booking
+        model = Review
         fields = [
             "user",
             "car",
