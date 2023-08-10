@@ -76,6 +76,18 @@ class BookingViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    def update(self, request, *args, **kwargs):
+        partial = request.method == "PATCH"
+        instance = self.get_object()
+        serializer = BookingCreateSerializer(
+            instance, data=request.data, partial=partial
+        )
+        serializer.is_valid(raise_exception=True)
+        booking = serializer.save()
+        serialized = BookingSerializer(booking, context={"request": request})
+
+        return Response(serialized.data)
+
     @action(detail=False, methods=["post"])
     def payment(self, request):
         stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -117,21 +129,36 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
-    def list(self, request):
+    @action(detail=False, methods=["post"])
+    def get_reviews(self, request):
         user = request.user
-        self_review = self.queryset.filter(user=user).first()
-        others_review = self.queryset.exclude(user=user)
+        booking_id = request.data["bookingId"]
+        try:
+            booking = Booking.objects.get(id=booking_id)
+            self_review = self.queryset.filter(user=user, car=booking.car).first()
+            others_review = self.queryset.filter(car=booking.car).exclude(user=user)
 
-        self_serialized = self.serializer_class(self_review)
-        others_serialized = self.serializer_class(others_review, many=True)
+            self_serialized = (
+                self.serializer_class(self_review) if self_review else None
+            )
 
-        return Response(
-            {
-                "review_given": self_review != None,
-                "data": [self_serialized.data, *others_serialized.data],
-            },
-            status=status.HTTP_201_CREATED,
-        )
+            others_serialized = self.serializer_class(others_review, many=True)
+            car_serializer = CarSerializer(booking.car)
+            return Response(
+                {
+                    "self_review": self_serialized.data if self_serialized else None,
+                    "data": others_serialized.data,
+                    "car": car_serializer.data,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Booking.DoesNotExist:
+            return Response(
+                {
+                    "message": "Invalid Booking ID",
+                },
+                status=status.HTTP_404_NOT_FOUND,  # 01b3cb
+            )
 
     def create(self, request):
         user = request.user
@@ -144,7 +171,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 {
                     "message": "You can't rate other's booking",
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST,  # 01b3cb
             )
         already_reviewed = Review.objects.filter(car=car, user=user)
         if already_reviewed.exists():
