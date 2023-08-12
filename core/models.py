@@ -47,7 +47,7 @@ class Car(models.Model):
             total += review.rating
 
         if reviews.count() > 0:
-            return f"{total / reviews.count():.2f}"
+            return {"average": f"{total / reviews.count():.1f}", "count": len(reviews)}
         else:
             return None
 

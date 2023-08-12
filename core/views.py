@@ -143,7 +143,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             )
 
             others_serialized = self.serializer_class(others_review, many=True)
-            car_serializer = CarSerializer(booking.car)
+            car_serializer = CarSerializer(booking.car, context={"request": request})
             return Response(
                 {
                     "self_review": self_serialized.data if self_serialized else None,
