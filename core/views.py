@@ -44,6 +44,15 @@ class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
+    def list(self, request, *args, **kwargs):
+        if request.user.is_staff:
+            queryset = self.queryset.order_by("-created_at")
+        else:
+            queryset = self.queryset.filter(user=request.user)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def create(self, request):
         User = get_user_model()
         user_email = request.data["email"]
