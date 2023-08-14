@@ -66,7 +66,9 @@ class ObtainJWTTokenView(APIView):
         user = authenticate(email=email, password=password)
         if user is not None:
             token = create_token(user)
-            return Response({"token": token}, status=status.HTTP_200_OK)
+            return Response(
+                {"token": token, "is_admin": user.is_staff}, status=status.HTTP_200_OK
+            )
         return Response(
             {"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST
         )

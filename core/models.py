@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 import random
 
 
@@ -59,6 +60,7 @@ class Booking(models.Model):
     BOOKING_OPTIONS = (("days", "By Days"), ("distance", "By Distance"))
     BOOKING_STATUS = (
         ("idle", "Idle"),
+        ("upcomming", "Upcomming"),
         ("active", "Active"),
         ("completed", "Completed"),
         ("canceled", "Canceled"),
@@ -81,7 +83,19 @@ class Booking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.car.model} - {self.booked_from}"
+        return f"{self.user.email} - {self.car.model} - {self.booked_from}"
+
+    def update_status(self):
+        if self.booking_status in ["active", "upcomming"]:
+            now = timezone.now()
+
+            if now >= self.booked_from:
+                if now >= self.booked_until:
+                    self.booking_status = "completed"
+                    self.save()
+                elif self.booking_status != "active":
+                    self.booking_status = "active"
+                    self.save()
 
 
 class Review(models.Model):

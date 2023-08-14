@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from .models import Car, Booking, Review, Payment
@@ -44,7 +44,17 @@ class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
+    def get_permissions(self):
+        if self.action == "destroy":
+            permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
     def list(self, request, *args, **kwargs):
+        for booking in self.queryset:
+            booking.update_status()
+
         if request.user.is_staff:
             queryset = self.queryset.order_by("-created_at")
         else:
@@ -88,6 +98,13 @@ class BookingViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = request.method == "PATCH"
         instance = self.get_object()
+
+        if not (request.user.is_staff or (instance.user == request.user)):
+            return Response(
+                {"message": "You are not allowed to perform this action"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         serializer = BookingCreateSerializer(
             instance, data=request.data, partial=partial
         )
@@ -137,6 +154,7 @@ class BookingViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
 
     @action(detail=False, methods=["post"])
     def get_reviews(self, request):
