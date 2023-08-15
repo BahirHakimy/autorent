@@ -3,25 +3,37 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.permissions import (
+    AllowAny,
+    IsAdminUser,
+    IsAuthenticated,
+    BasePermission,
+)
 from rest_framework import viewsets
 from .serializers import UserSerializer, UserCreateSerializer
 from .token_factory import create_token
 
 
-# Create your views here.
+class IsOwnerOrAdmin(BasePermission):
+    def has_permission(self, request, view):
+        instance = view.get_object()
+        return bool(request.user.is_staff or instance == request.user)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     User = get_user_model()
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def get_permissions(self):
-        if self.action in ["list", "update"]:
+        if self.action in ["retrieve", "update"]:
+            permission_classes = [IsOwnerOrAdmin]
+        elif self.action == "list":
             permission_classes = [IsAdminUser]
-        elif self.action == "check_admin":
-            permission_classes = [IsAuthenticated]
-        else:
+        elif self.action == "create":
             permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def list(self, request, *args, **kwargs):
@@ -45,6 +57,19 @@ class UserViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = UserSerializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
+        if not request.user.is_staff and password:
+            old_password = request.data.get("old_password", None)
+            if not old_password:
+                return Response(
+                    {"old_password": "old_password is required."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if not instance.check_password(old_password):
+                return Response(
+                    {"old_password": "Invalid password."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         user = serializer.save()
         if password:
             user.set_password(password)

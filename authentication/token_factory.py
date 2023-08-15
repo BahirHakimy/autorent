@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 def create_token(user):
     payload = {
         "user_id": user.pk,
-        "fullname": user.get_full_name(),
+        "is_admin": user.is_staff,
         "email": user.email,
         "exp": datetime.utcnow()
         + timedelta(seconds=settings.JWT_EXPIRATION_TIME_SECONDS),

@@ -6,13 +6,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
 from .models import Car, Booking, Review, Payment
 from .serializers import (
     BookingSerializer,
     BookingCreateSerializer,
     CarSerializer,
     ReviewSerializer,
+    PaymentSerializer,
 )
 import stripe
 
@@ -154,7 +154,13 @@ class BookingViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action == "destroy":
+            permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
 
     @action(detail=False, methods=["post"])
     def get_reviews(self, request):
@@ -217,3 +223,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
         serializer = ReviewSerializer(review)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    def get_permissions(self):
+        if self.action == "create":
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
+
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
