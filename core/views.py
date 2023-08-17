@@ -18,122 +18,38 @@ from .serializers import (
 )
 import stripe
 
-import random
-import pytz
-from faker import Faker
-from django.contrib.auth.hashers import make_password
-
-fake = Faker()
-
-
-def create_users(num_users=10):
-    for _ in range(num_users):
-        email = fake.email()
-        password = make_password("123123")
-        phone_number = fake.phone_number()
-        first_name = fake.name()
-        last_name = fake.last_name()
-        get_user_model().objects.create_user(
-            email=email,
-            password=password,
-            phone_number=phone_number,
-            first_name=first_name,
-            last_name=last_name,
-        )
-
-
-def create_cars(num_cars=10):
-    car_types = ["sedan", "suv", "minivan", "sport"]
-    for _ in range(num_cars):
-        car_type = random.choice(car_types)
-        image = "cars/bmw-gran-coup_kxg0I73.png"  # Replace with the actual image path
-        model = fake.word()
-        price_per_hour = random.uniform(20, 100)
-        price_per_km = random.uniform(0.1, 1)
-        number_of_seats = random.randint(2, 7)
-        Car.objects.create(
-            car_type=car_type,
-            image=image,
-            model=model,
-            price_per_hour=price_per_hour,
-            price_per_km=price_per_km,
-            number_of_seats=number_of_seats,
-        )
-
-
-def create_bookings(num_bookings=20):
-    users = get_user_model().objects.filter(is_staff=False)
-    cars = Car.objects.all()
-    booking_statuses = ["idle", "upcomming", "active", "completed", "canceled"]
-    booking_options = ["days", "distance"]
-
-    for _ in range(num_bookings):
-        user = random.choice(users)
-        car = random.choice(cars)
-        pick_up_location = fake.address()
-        drop_off_location = fake.address()
-        booked_from = fake.date_time_between(start_date="-180d", end_date="+30d")
-        created_at = fake.date_time_between(start_date="-210d", end_date="+1d")
-        booked_until = booked_from + timedelta(hours=random.randint(1, 72))
-        booking_type = random.choice(booking_options)
-        booking_amount = random.uniform(50, 500)
-        total_cost = random.uniform(booking_amount, 1000)
-        booking_status = random.choice(booking_statuses)
-        Booking.objects.create(
-            user=user,
-            car=car,
-            pick_up_location=pick_up_location,
-            drop_off_location=drop_off_location,
-            booked_from=booked_from,
-            booked_until=booked_until,
-            booking_type=booking_type,
-            booking_amount=booking_amount,
-            total_cost=total_cost,
-            booking_status=booking_status,
-            created_at=created_at,
-        )
-
-
-# Create reviews
-def create_reviews(num_reviews=30):
-    users = get_user_model().objects.all()
-    cars = Car.objects.all()
-
-    for _ in range(num_reviews):
-        user = random.choice(users)
-        car = random.choice(cars)
-        rating = random.randint(1, 5)
-        comment = fake.paragraph()
-        Review.objects.create(user=user, car=car, rating=rating, comment=comment)
-
 
 class CarViewSet(viewsets.ModelViewSet):
     queryset = Car.objects.all()
     serializer_class = CarSerializer
-
-    def list(self, request):
-        # create_users()
-        # create_cars()
-        create_bookings()
-        return Response({})
+    permission_classes = [IsAdminUser]
 
     @action(detail=False, methods=["post"], permission_classes=[AllowAny])
     def search(self, request, *args, **kwargs):
-        pickup = request.data["pickup_datetime"]
-        dropoff = request.data["dropoff_datetime"]
-        pickup_datetime = datetime.strptime(pickup, "%Y-%m-%dT%H:%M")
-        dropoff_datetime = datetime.strptime(dropoff, "%Y-%m-%dT%H:%M")
-        cars = self.get_queryset()
-        available_cars = [
-            car
-            for car in cars
-            if car.check_availability(pickup_datetime, dropoff_datetime)
-        ]
-        serialized = CarSerializer(
-            available_cars, many=True, context={"request": request}
-        )
+        pickup = request.data.get("pickup_datetime")
+        dropoff = request.data.get("dropoff_datetime")
+        filter_type = request.data.get("car_type")
+        if pickup and dropoff:
+            pickup_datetime = datetime.strptime(pickup, "%Y-%m-%dT%H:%M")
+            dropoff_datetime = datetime.strptime(dropoff, "%Y-%m-%dT%H:%M")
+            cars = self.get_queryset()
+            if filter_type:
+                cars = cars.filter(car_type=filter_type)
+            available_cars = [
+                car
+                for car in cars
+                if car.check_availability(pickup_datetime, dropoff_datetime)
+            ]
+            serialized = CarSerializer(
+                available_cars, many=True, context={"request": request}
+            )
 
-        return Response(serialized.data)
+            return Response(serialized.data)
+        else:
+            return Response(
+                {"detail": "pickup_datetime and dropoff_datetime are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class BookingViewSet(viewsets.ModelViewSet):
@@ -193,19 +109,23 @@ class BookingViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         partial = request.method == "PATCH"
+        status = request.data.get("booking_status", None)
         instance = self.get_object()
-
         if not (request.user.is_staff or (instance.user == request.user)):
             return Response(
                 {"message": "You are not allowed to perform this action"},
                 status=status.HTTP_403_FORBIDDEN,
             )
+        send_email = False
+        if status == "canceled" and instance.booking_status in ["active", "upcomming"]:
+            send_email = True
 
         serializer = BookingCreateSerializer(
             instance, data=request.data, partial=partial
         )
         serializer.is_valid(raise_exception=True)
         booking = serializer.save()
+        booking.user.send_email(booking)
         serialized = BookingSerializer(booking, context={"request": request})
 
         return Response(serialized.data)

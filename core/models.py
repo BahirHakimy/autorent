@@ -113,7 +113,7 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.car.model} - {self.rating}"
+        return f"{self.id} - {self.car.model} - {self.rating}"
 
 
 class Payment(models.Model):

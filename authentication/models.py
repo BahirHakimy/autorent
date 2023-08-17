@@ -1,11 +1,10 @@
-from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from django.conf import settings
 from django.contrib.auth.models import UserManager
+from django.utils import timezone
 
 
 class CustomUserManager(UserManager):
@@ -52,15 +51,21 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = [""]
 
     def send_email(self, booking):
-        subject = "Booking Confirmed"
+        if booking.booking_status == "active":
+            subject = "Booking Confirmed"
+            message = "created successfully."
+            template = "email/BookingConfirm.html"
+        else:
+            subject = "Booking Canceled"
+            message = "canceled."
+            template = "email/BookingCancel.html"
+
         from_email = "AutoRent Rentals"
         recipient_list = [self.email]
 
-        text_message = f"This email confirms that your booking with #{booking.booking_number} number was created successfully."
-        time = datetime.now().strftime("%b, %e %Y - %I:%M:%S")
-        html_message = render_to_string(
-            "email/Booking_Confirm.html", {"booking": booking, "time": time}
-        )
+        text_message = f"This email confirms that your booking with #{booking.booking_number} number was {message}"
+        today = timezone.now()
+        html_message = render_to_string(template, {"booking": booking, "today": today})
 
         # Create the EmailMultiAlternatives object
         email = EmailMultiAlternatives(
