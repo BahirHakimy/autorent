@@ -3,12 +3,14 @@ from django.utils import timezone
 from django.conf import settings
 from django.db.models import Sum
 from django.contrib.auth import get_user_model
+from django.core.paginator import Paginator
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import status
 from .models import Car, Booking, Review, Payment
+from django.shortcuts import render
 from .serializers import (
     BookingSerializer,
     BookingCreateSerializer,
@@ -18,11 +20,23 @@ from .serializers import (
 )
 import stripe
 
-
 class CarViewSet(viewsets.ModelViewSet):
     queryset = Car.objects.all()
     serializer_class = CarSerializer
     permission_classes = [IsAdminUser]
+
+    def list(self, request, *args, **kwargs):
+        page_number = request.query_params.get("page", 1)
+        paginated = Paginator(self.queryset, 20)
+        paged_data = paginated.page(page_number)
+        has_next = paged_data.has_next()
+
+        serializer = CarSerializer(
+            paged_data,
+            many=True,
+            context={"request": request},
+        )
+        return Response({"results": serializer.data, "has_next": has_next})
 
     @action(detail=False, methods=["post"], permission_classes=[AllowAny])
     def search(self, request, *args, **kwargs):
@@ -40,11 +54,14 @@ class CarViewSet(viewsets.ModelViewSet):
                 for car in cars
                 if car.check_availability(pickup_datetime, dropoff_datetime)
             ]
-            serialized = CarSerializer(
-                available_cars, many=True, context={"request": request}
+
+            serializer = CarSerializer(
+                available_cars,
+                many=True,
+                context={"request": request},
             )
 
-            return Response(serialized.data)
+            return Response(serializer.data)
         else:
             return Response(
                 {"detail": "pickup_datetime and dropoff_datetime are required"},
@@ -72,8 +89,13 @@ class BookingViewSet(viewsets.ModelViewSet):
         else:
             queryset = self.queryset.filter(user=request.user)
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        page_number = request.query_params.get("page", 1)
+        paginated = Paginator(queryset, 20)
+        paged_data = paginated.page(page_number)
+        has_next = paged_data.has_next()
+
+        serializer = self.get_serializer(paged_data, many=True)
+        return Response({"results": serializer.data, "has_next": has_next})
 
     def create(self, request):
         User = get_user_model()
@@ -248,6 +270,19 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
+    def list(self, request):
+        page_number = request.query_params.get("page", 1)
+        paginated = Paginator(self.queryset, 20)
+        paged_data = paginated.page(page_number)
+        has_next = paged_data.has_next()
+
+        serializer = ReviewSerializer(
+            paged_data,
+            many=True,
+        )
+
+        return Response({"results": serializer.data, "has_next": has_next})
+
     def get_permissions(self):
         if self.action == "destroy":
             permission_classes = [IsAdminUser]
@@ -328,3 +363,16 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
+
+    def list(self, request):
+        page_number = request.query_params.get("page", 1)
+        paginated = Paginator(self.queryset, 20)
+        paged_data = paginated.page(page_number)
+        has_next = paged_data.has_next()
+
+        serializer = PaymentSerializer(
+            paged_data,
+            many=True,
+        )
+
+        return Response({"results": serializer.data, "has_next": has_next})
