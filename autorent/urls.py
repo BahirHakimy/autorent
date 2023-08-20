@@ -1,17 +1,16 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf.urls.static import static
 from django.conf import settings
 from authentication.views import ObtainJWTTokenView
-from django.views.static import serve
+from django.views.generic import TemplateView, RedirectView
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("admin-panel/", admin.site.urls),
     path("api/login", ObtainJWTTokenView.as_view()),
     path("api/", include("core.urls")),
-    path(
-        "react/", serve, {"document_root": settings.FRONTEND_ROOT, "path": "index.html"}
-    ),
+    path("", TemplateView.as_view(template_name="index.html")),
+    re_path(r"^(?P<path>.*)/$", TemplateView.as_view(template_name="index.html")),
 ]
 
 

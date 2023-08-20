@@ -25,7 +25,9 @@ class Car(models.Model):
     def check_availability(self, from_date, to_date):
         from_date = timezone.make_aware(from_date, timezone.get_default_timezone())
         to_date = timezone.make_aware(to_date, timezone.get_default_timezone())
-        bookings = self.booking_set.filter(booking_status__in=["idle", "active"])
+        bookings = self.booking_set.filter(
+            booking_status__in=["idle", "upcomming", "active"]
+        )
 
         if not bookings.exists():
             return True
@@ -86,9 +88,8 @@ class Booking(models.Model):
         return f"{self.user.email} - {self.car.model} - {self.booked_from}"
 
     def update_status(self):
+        now = timezone.now()
         if self.booking_status in ["active", "upcomming"]:
-            now = timezone.now()
-
             if now >= self.booked_from:
                 if now >= self.booked_until:
                     self.booking_status = "completed"
@@ -96,6 +97,10 @@ class Booking(models.Model):
                 elif self.booking_status != "active":
                     self.booking_status = "active"
                     self.save()
+        elif self.booking_status == "idle":
+            if now >= self.booked_until:
+                self.booking_status = "canceled"
+                self.save()
 
 
 class Review(models.Model):
