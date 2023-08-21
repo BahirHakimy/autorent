@@ -20,6 +20,7 @@ from .serializers import (
 )
 import stripe
 
+
 class CarViewSet(viewsets.ModelViewSet):
     queryset = Car.objects.all()
     serializer_class = CarSerializer
@@ -184,7 +185,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             amount=(payment_data["amount"] / 100),
         )
         payment.save()
-        booking.booking_status = "active"
+        booking.booking_status = "upcomming"
         booking.save()
         return Response({"message": "Payment was successfully"})
 

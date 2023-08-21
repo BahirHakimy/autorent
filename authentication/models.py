@@ -51,7 +51,7 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = [""]
 
     def send_email(self, booking):
-        if booking.booking_status == "active":
+        if booking.booking_status in ["idle", "upcomming"]:
             subject = "Booking Confirmed"
             message = "created successfully."
             template = "email/BookingConfirm.html"
@@ -72,7 +72,6 @@ class CustomUser(AbstractUser):
             subject, text_message, from_email, recipient_list
         )
         email.attach_alternative(html_message, "text/html")
-
         email.send()
 
     def __str__(self) -> str:

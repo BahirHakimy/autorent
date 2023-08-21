@@ -6,8 +6,8 @@ from rest_framework import status
 from rest_framework.permissions import (
     AllowAny,
     IsAdminUser,
-    IsAuthenticated,
     BasePermission,
+    IsAuthenticated,
 )
 from rest_framework import viewsets
 from .serializers import UserSerializer, UserCreateSerializer
@@ -18,6 +18,14 @@ class IsOwnerOrAdmin(BasePermission):
     def has_permission(self, request, view):
         instance = view.get_object()
         return bool(request.user.is_staff or instance == request.user)
+
+
+class IsSuperUser(BasePermission):
+    def has_permission(self, request, view):
+        instance = view.get_object()
+        if instance.is_superuser:
+            return False
+        return bool(request.user.is_staff)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -32,12 +40,17 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAdminUser]
         elif self.action == "create":
             permission_classes = [AllowAny]
+        elif self.action == "destroy":
+            permission_classes = [IsSuperUser]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def list(self, request, *args, **kwargs):
-        queryset = self.queryset.exclude(id=request.user.id)
+        if request.user.is_superuser:
+            queryset = self.queryset.exclude(id=request.user.id)
+        else:
+            queryset = self.queryset.filter(is_staff=False)
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

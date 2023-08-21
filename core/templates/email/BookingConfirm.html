@@ -1,3 +1,5 @@
+{% load core_extras %}
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html
   xmlns="http://www.w3.org/1999/xhtml"
@@ -768,7 +770,7 @@
                                         color: #ffffff;
                                       "
                                     >
-                                      Hey, Thomas,<br />Your booking is
+                                      Hey, {%firstof booking.user.first_name booking.user.email|split_first:"@" %},<br />Your booking is
                                       confirmed!
                                     </h1>
                                   </td>
