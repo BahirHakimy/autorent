@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "autorent.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "autorent.settings_prod")
 import django
 
 django.setup()
@@ -41,11 +41,13 @@ images = [
 def create_users(num_users=10):
     for _ in range(num_users):
         email = fake.email()
-        password = make_password("123123")
-        phone_number = fake.phone_number()
-        get_user_model().objects.create_user(
+        phone_number = f"+937{random.randint(10000000,99999999)}"
+        password = "123123"
+        print(phone_number)
+        user = get_user_model().objects.create_user(
             email=email, password=password, phone_number=phone_number
         )
+        user.save()
 
 
 # Create cars
@@ -53,7 +55,7 @@ def create_cars(num_cars=10):
     car_types = ["sedan", "suv", "minivan", "sport"]
     for _ in range(num_cars):
         car_type = random.choice(car_types)
-        image = random.choice(images)  # Replace with the actual image path
+        image = random.choice(images)
         model = fake.vehicle_year_make_model()
         price_per_hour = random.uniform(20, 100)
         price_per_km = random.uniform(0.1, 1)
@@ -75,21 +77,20 @@ def create_bookings(start_date, num_bookings=20):
     booking_statuses = ["idle", "upcomming", "active", "completed", "canceled"]
     booking_options = "days"
     start_from = start_date
-
     for _ in range(num_bookings):
         user = random.choice(users)
         car = random.choice(cars)
         pick_up_location = fake.address()
         drop_off_location = fake.address()
         booked_from = fake.date_time_between(
-            start_date="-30d", end_date="+30d", tzinfo=timezone.utc
+            start_date="-180d", end_date="+30d", tzinfo=timezone.utc
         )
         booked_until = booked_from + timedelta(days=random.randint(1, 7))
-        booking_type = random.choice(booking_options)
+        booking_type = booking_options
         booking_amount = (booked_until - booked_from).days
         total_cost = booking_amount * (car.price_per_hour * 24)
         booking_status = random.choice(booking_statuses)
-        Booking.objects.create(
+        booking = Booking.objects.create(
             user=user,
             car=car,
             pick_up_location=pick_up_location,
@@ -100,13 +101,14 @@ def create_bookings(start_date, num_bookings=20):
             booking_amount=(booked_until - booked_from).days,
             total_cost=total_cost,
             booking_status=booking_status,
-            created_at=start_from,
         )
+        booking.created_at = start_from
+        booking.save()
         start_from = start_from + timedelta(days=4)
 
 
 # Create reviews
-def create_reviews(num_reviews=30):
+def create_reviews():
     bookings = Booking.objects.filter(booking_status="completed")
 
     for booking in bookings:
@@ -118,20 +120,22 @@ def create_reviews(num_reviews=30):
 
 
 # Create payments
-def create_payments(num_payments=40):
+def create_payments():
     bookings = Booking.objects.filter(booking_status="completed")
 
     for booking in bookings:
         payment_id = fake.uuid4()
         amount = booking.total_cost
-        Payment.objects.create(booking=booking, payment_id=payment_id, amount=amount)
+        payment = Payment.objects.create(
+            booking=booking, payment_id=payment_id, amount=amount
+        )
+        payment.created_at = booking.created_at
+        payment.save()
 
 
 # Seed the database
 def seed_database():
-    create_users()
-    create_bookings()
-    create_payments()
+    start_time = timezone.now() - timedelta(days=200)
     create_reviews()
 
 

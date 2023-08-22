@@ -48,7 +48,7 @@ class CustomUser(AbstractUser):
         verbose_name_plural = "users"
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = [""]
+    REQUIRED_FIELDS = []
 
     def send_email(self, booking):
         if booking.booking_status in ["idle", "upcomming"]:
