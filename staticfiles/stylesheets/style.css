@@ -1,0 +1,10 @@
+#map {
+  height: 600px;
+}
+body {
+  /* background: #000; */
+}
+input[type='text']:focus {
+  outline: none;
+  box-shadow: none;
+}
