@@ -58,10 +58,7 @@
 
 - [Demo](https://autorent-rentals.onrender.com/)
 
-- Use link bellow to see the admin Dashboard
-- # [Dashboard](https://autorent-rentals.onrender.com/admin)
-
-- Use bellow credentials to login
+- Use bellow credentials to login as admin and see the admin **Dashboard**
   - email: bahirhakimy2015@gmail.com
   - password: autorentadmin
 
