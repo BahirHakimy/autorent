@@ -18,21 +18,21 @@ fake = Faker()
 fake.add_provider(VehicleProvider)
 
 images = [
-    "cars/Audi-x43.png",
-    "cars/bmw-gran-coup.png",
-    "cars/bmw-i7.png",
-    "cars/bmw-x4.png",
-    "cars/bmw-x6.png",
-    "cars/bmw-xli-sport.png",
-    "cars/bmw-z4.png",
-    "cars/Huandai-minivan.png",
-    "cars/Huandai.png",
-    "cars/kia_yFhoJv5.png",
-    "cars/nissan-gtr_V2chwd7.png",
-    "cars/nissan-rogue-sport .png",
-    "cars/nissan-rogue-sport_.png",
-    "cars/saleva-sedan.png",
-    "cars/vehicle.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//Audi-x43.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//bmw-gran-coup.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//bmw-i7.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//bmw-x4.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//bmw-x6.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//bmw-xli-sport.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//bmw-z4.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//Huandai-minivan.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//Huandai.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//kia_yFhoJv5.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//nissan-gtr_V2chwd7.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//nissan-rogue-sport .png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//nissan-rogue-sport_.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//saleva-sedan.png",
+    "https://raw.githubusercontent.com/BahirHakimy/file_storage_for_autorent/main//vehicle.png",
 ]
 
 

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
+    "github_storages",
     "rest_framework",
     "core.apps.CoreConfig",
     "authentication.apps.AuthenticationConfig",
