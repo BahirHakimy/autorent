@@ -7,7 +7,9 @@ django-cors-headers==4.2.0
 djangorestframework==3.14.0
 Faker==19.3.1
 faker-vehicle==0.2.0
+gunicorn==21.2.0
 idna==3.4
+packaging==23.1
 Pillow==10.0.0
 psycopg2-binary==2.9.7
 PyJWT==2.8.0
