@@ -16,7 +16,7 @@ class Car(models.Model):
     )
 
     car_type = models.CharField(choices=CAR_TYPES, max_length=10)
-    image = models.ImageField(upload_to="cars/", blank=True)
+    image = models.ImageField(upload_to="cars/", max_length=255, blank=True)
     model = models.CharField(max_length=100)
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
     price_per_km = models.DecimalField(max_digits=10, decimal_places=2)
