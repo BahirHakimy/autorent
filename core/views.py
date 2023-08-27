@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import status
 from .models import Car, Booking, Review, Payment
-from django.shortcuts import render
+from django.db.models import Q
 from .serializers import (
     BookingSerializer,
     BookingCreateSerializer,
@@ -152,6 +152,9 @@ class BookingViewSet(viewsets.ModelViewSet):
             stripe.api_key = settings.STRIPE_SECRET_KEY
             paymentIntent = stripe.PaymentIntent.retrieve(instance.payment.payment_id)
             stripe.Refund.create(payment_intent=paymentIntent)
+            payment = instance.payment
+            payment.status = "refunded"
+            payment.save()
             booking.user.send_email(booking)
         serialized = BookingSerializer(booking, context={"request": request})
 
@@ -197,9 +200,9 @@ class BookingViewSet(viewsets.ModelViewSet):
     def get_report(self, request):
         now = timezone.now()
         thisMonth = now - timedelta(days=now.day)
-        payments = Payment.objects.filter(created_at__gte=thisMonth).aggregate(
-            Sum("amount")
-        )
+        payments = Payment.objects.filter(
+            created_at__gte=thisMonth, status="completed"
+        ).aggregate(Sum("amount"))
         bookings_this_month = self.queryset.filter(created_at__gte=thisMonth).count()
         total_customers = get_user_model().objects.filter(is_staff=False).count()
         total_cars = Car.objects.count()

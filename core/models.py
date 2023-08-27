@@ -122,9 +122,16 @@ class Review(models.Model):
 
 
 class Payment(models.Model):
+    STATUS_OPTIONS = (
+        ("completed", "Completed"),
+        ("refunded", "Refunded"),
+    )
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
     payment_id = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(
+        max_length=55, choices=STATUS_OPTIONS, default="completed"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
