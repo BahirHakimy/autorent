@@ -71,7 +71,7 @@ class CarViewSet(viewsets.ModelViewSet):
 
 
 class BookingViewSet(viewsets.ModelViewSet):
-    queryset = Booking.objects.all()
+    queryset = Booking.objects.order_by("-created_at")
     serializer_class = BookingSerializer
 
     def get_permissions(self):
@@ -148,7 +148,11 @@ class BookingViewSet(viewsets.ModelViewSet):
         )
         serializer.is_valid(raise_exception=True)
         booking = serializer.save()
-        booking.user.send_email(booking)
+        if send_email:
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            paymentIntent = stripe.PaymentIntent.retrieve(instance.payment.payment_id)
+            stripe.Refund.create(payment_intent=paymentIntent)
+            booking.user.send_email(booking)
         serialized = BookingSerializer(booking, context={"request": request})
 
         return Response(serialized.data)
@@ -362,7 +366,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
 
-    queryset = Payment.objects.all()
+    queryset = Payment.objects.order_by("-created_at")
     serializer_class = PaymentSerializer
 
     def list(self, request):
