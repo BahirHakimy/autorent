@@ -1,6 +1,6 @@
 import random
-from datetime import timedelta
-from django.utils import timezone
+from datetime import timedelta, timezone
+# from django.utils import timezone
 import os
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "autorent.settings_prod")
@@ -99,6 +99,7 @@ def create_bookings(start_date, num_bookings=20):
         total_cost = booking_amount * (car.price_per_hour * 24)
         booking_status = random.choice(booking_statuses)
         booking = Booking.objects.create(
+            booking_number=random.randint(10000000,99999999),
             user=user,
             car=car,
             pick_up_location=pick_up_location,
@@ -142,7 +143,7 @@ def create_payments():
     for booking in bookings:
         payment_id = fake.uuid4()
         amount = booking.total_cost
-        print(f"    Review [{amount}]")
+        print(f"    Payment [{amount}]")
         payment = Payment.objects.create(
             booking=booking, payment_id=payment_id, amount=amount
         )
@@ -154,11 +155,11 @@ def create_payments():
 # Seed the database
 def seed_database():
     start_time = timezone.now() - timedelta(days=200)
-    create_users(5)
-    # create_cars(25)
-    # create_bookings(start_date=start_time, num_bookings=50)
-    # create_payments()
-    # create_reviews()
+    # create_users(25)
+    # create_cars(20)
+    create_bookings(start_date=start_time, num_bookings=40)
+    create_payments()
+    create_reviews()
 
 
 if __name__ == "__main__":
