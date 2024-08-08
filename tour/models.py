@@ -33,7 +33,7 @@ class Tour(models.Model):
     description = models.TextField()
     highlights = models.ManyToManyField("Highlights")
     availability = models.CharField(choices=AVAILABILITY_CHOICES, max_length=55)
-    category = models.CharField(choices=AVAILABILITY_CHOICES, max_length=55)
+    category = models.CharField(choices=CATEGORY_CHOICES, max_length=55)
     sub_category = models.CharField(max_length=255)
     cover_image = models.ImageField(upload_to="tour_covers")
     duration = models.DecimalField(max_digits=10, decimal_places=2)
