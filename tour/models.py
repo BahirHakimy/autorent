@@ -77,4 +77,4 @@ class Tour(models.Model):
             return None
 
     def __str__(self):
-        return f"{self.model} - {self.car_type}"
+        return f"{self.title} - {self.category}"
