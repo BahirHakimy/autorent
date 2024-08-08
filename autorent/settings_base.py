@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "core.apps.CoreConfig",
     "authentication.apps.AuthenticationConfig",
+    "tour.apps.TourConfig"
 ]
 
 MIDDLEWARE = [
