@@ -8,7 +8,7 @@ from django.views.generic import TemplateView, RedirectView
 urlpatterns = [
     path("admin-panel/", admin.site.urls),
     path("api/login", ObtainJWTTokenView.as_view()),
-    path("api/", include("core.urls")),
+    path("api/", include("tour.urls")),
     path("", TemplateView.as_view(template_name="index.html")),
     re_path(r"^(?P<path>.*)/$", TemplateView.as_view(template_name="index.html")),
 ]
