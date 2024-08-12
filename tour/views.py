@@ -9,10 +9,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import status
-from .models import Tour, TourImage, Highlights
+from .models import Tour, TourImage, Highlights, Transfer, Review, Hotel
 from django.db.models import Q
 from .serializers import (
-    TourSerializer, TourImageSerializer, HighlightSerializer
+    TourSerializer, TourImageSerializer, HighlightSerializer, TransferSerializer, ReviewSerializer, HotelSerializer
 )
 
 
@@ -85,3 +85,21 @@ class TourViewSet(viewsets.ModelViewSet):
                 {"detail": "pickup_datetime and dropoff_datetime are required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class TransferViewSet(viewsets.ModelViewSet):
+    queryset = Transfer.objects.all()
+    serializer_class = TransferSerializer
+    permission_classes = [AllowAny]
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Transfer.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [AllowAny]
+
+
+class HotelViewSet(viewsets.ModelViewSet):
+    queryset = Transfer.objects.all()
+    serializer_class = HotelSerializer
+    permission_classes = [AllowAny]

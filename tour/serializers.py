@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Tour, TourImage, Highlights
+from .models import Tour, TourImage, Highlights, Transfer, Review, Hotel
 
 # from authentication.serializers import UserSerializer
 
@@ -57,4 +57,42 @@ class TourImageSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "image",
+        ]
+
+
+class TransferSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Highlights
+        fields = [
+            "id",
+            "title",
+            "code",
+            "cancellation_policy",
+            "cost_from",
+        ]
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Highlights
+        fields = [
+            "id",
+            "name",
+            "comment",
+            "rating",
+            "tour_id",
+            "email",
+        ]
+        
+
+class HotelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Highlights
+        fields = [
+            "id",
+            "name",
+            "address",
         ]

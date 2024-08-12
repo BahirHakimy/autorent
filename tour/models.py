@@ -78,3 +78,42 @@ class Tour(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.category}"
+
+
+class Transfer(models.Model):
+    title = models.CharField(max_length=255)
+    code = models.CharField(max_length=255)
+    cost_from = models.DecimalField(max_digits=10, decimal_places=2)
+    cancellation_policy = models.TextField()
+    image = models.ImageField(upload_to='transfers')
+    
+    def __str__(self):
+        return self.title
+    
+    
+class Review(models.Model):
+    RATING_CHOICES = (
+        (1, "1"),
+        (2, "2"),
+        (3, "3"),
+        (4, "4"),
+        (5, "5"),
+    )
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    tour_id = models.ForeignKey(Tour, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.id} - {self.tour_id.title} - {self.rating}"
+    
+    
+class Hotel(models.Model):
+    name = models.CharField(max_length=255)
+    address = models.CharField(max_length=255)
+    
+    
+    def __str__ (self):
+        return self.name
