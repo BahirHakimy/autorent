@@ -61,22 +61,24 @@ class TourImageSerializer(serializers.ModelSerializer):
 
 
 class TransferSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(use_url=True)
 
     class Meta:
-        model = Highlights
+        model = Transfer
         fields = [
             "id",
             "title",
             "code",
             "cancellation_policy",
             "cost_from",
+            "image",
         ]
 
 
 class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Highlights
+        model = Review
         fields = [
             "id",
             "name",
@@ -90,7 +92,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 class HotelSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Highlights
+        model = Hotel
         fields = [
             "id",
             "name",

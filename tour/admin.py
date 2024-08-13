@@ -1,5 +1,5 @@
 from django.contrib import admin
-from tour.models import Tour, TourImage, Highlights
+from tour.models import Tour, TourImage, Highlights, Transfer, Hotel, Review
 
 @admin.register(Highlights)
 class HighlightAdmin(admin.ModelAdmin):
@@ -23,8 +23,20 @@ class TourAdmin(admin.ModelAdmin):
 
 
 @admin.register(TourImage)
-class ReviewAdmin(admin.ModelAdmin):
+class TourImageAdmin(admin.ModelAdmin):
     list_display = (
         "tour_id",
     )
+
+@admin.register(Transfer)
+class TransferAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Hotel)
+class HotelAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    pass
 
