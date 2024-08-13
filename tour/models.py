@@ -13,7 +13,7 @@ class TourImage(models.Model):
 
 
 class Highlights(models.Model):
-    title = models.CharField(max_length=55)
+    title = models.CharField(max_length=55, unique=True)
 
 
 class Tour(models.Model):
@@ -29,7 +29,7 @@ class Tour(models.Model):
         ("normal_trip", "Normal Trip"),
     )
 
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, unique=True)
     description = models.TextField()
     highlights = models.ManyToManyField("Highlights")
     availability = models.CharField(choices=AVAILABILITY_CHOICES, max_length=55)
@@ -81,8 +81,8 @@ class Tour(models.Model):
 
 
 class Transfer(models.Model):
-    title = models.CharField(max_length=255)
-    code = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, unique=True)
+    code = models.CharField(max_length=255, unique=True)
     cost_from = models.DecimalField(max_digits=10, decimal_places=2)
     cancellation_policy = models.TextField()
     image = models.ImageField(upload_to='transfers')
@@ -111,9 +111,20 @@ class Review(models.Model):
     
     
 class Hotel(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     address = models.CharField(max_length=255)
     
-    
-    def __str__ (self):
+    def __str__(self):
         return self.name
+
+
+class Message(models.Model):
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    email = models.EmailField(max_length=100)
+    phone = models.CharField(max_length=20, null=True, blank=True)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from tour.models import Tour, TourImage, Highlights, Transfer, Hotel, Review
+from tour.models import Tour, TourImage, Highlights, Transfer, Hotel, Review, Message
 
 @admin.register(Highlights)
 class HighlightAdmin(admin.ModelAdmin):
@@ -39,4 +39,12 @@ class HotelAdmin(admin.ModelAdmin):
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = (
+        "first_name",
+        "last_name",
+        "created_at",
+    )
 

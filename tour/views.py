@@ -94,12 +94,12 @@ class TransferViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Transfer.objects.all()
+    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [AllowAny]
 
 
 class HotelViewSet(viewsets.ModelViewSet):
-    queryset = Transfer.objects.all()
+    queryset = Hotel.objects.all()
     serializer_class = HotelSerializer
     permission_classes = [AllowAny]
