@@ -14,6 +14,7 @@ from django.db.models import Q
 from .serializers import (
     TourSerializer, TourImageSerializer, HighlightSerializer, TransferSerializer, ReviewSerializer, HotelSerializer
 )
+import json
 
 
 class HighlightViewSet(viewsets.ModelViewSet):
@@ -30,16 +31,43 @@ class TourViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         tour_images = request.data.getlist('tour_image')
-        highlights = request.data.getlist('highlights')
+        highlights = request.data.get('highlights')
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         tour = serializer.save()
         for image in tour_images:
             TourImage.objects.create(image=image, tour_id=tour)
-        # for highlight in highlights:
+        for highlight in json.loads(highlights):
+            obj = Highlights.objects.get(id=highlight.get('id'))
+            tour.highlights.add(obj)
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        tour_images = request.data.getlist('tour_images')
+        highlights = request.data.get('highlights')
+        removed_images = request.data.get('removed_images')
+        obj = self.get_object()
+        serializer = self.get_serializer(obj, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        for image in json.loads(removed_images):
+            img = TourImage.objects.get(id=image.get('id'))
+            obj.image_ids.remove(img)
+        
+        for image in tour_images:
+            img = TourImage.objects.create(image=image, tour_id=obj)
+            obj.image_ids.add(img)
+        
+        obj.highlights.clear()
+
+        for highlight in json.loads(highlights):
+            highlight_obj = Highlights.objects.get(id=highlight.get('id'))
+            obj.highlights.add(highlight_obj)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def list(self, request, *args, **kwargs):
         page_number = request.query_params.get("page", 1)
