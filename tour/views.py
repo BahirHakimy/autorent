@@ -71,16 +71,23 @@ class TourViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         page_number = request.query_params.get("page", 1)
-        paginated = Paginator(self.queryset, 20)
+        paginated = Paginator(self.queryset, 10)
         paged_data = paginated.page(page_number)
         has_next = paged_data.has_next()
+        num_pages = paginated.num_pages
+        objects_count = paginated.count
 
         serializer = TourSerializer(
             paged_data,
             many=True,
             context={"request": request},
         )
-        return Response({"results": serializer.data, "has_next": has_next})
+        return Response(
+            {"results": serializer.data,
+            "has_next": has_next, 
+            "num_pages": num_pages,
+            "count": objects_count
+            })
 
     
 
@@ -119,6 +126,28 @@ class TransferViewSet(viewsets.ModelViewSet):
     queryset = Transfer.objects.all()
     serializer_class = TransferSerializer
     permission_classes = [AllowAny]
+
+
+    def list(self, request, *args, **kwargs):
+        page_number = request.query_params.get("page", 1)
+        paginated = Paginator(self.queryset, 10)
+        paged_data = paginated.page(page_number)
+        has_next = paged_data.has_next()
+        num_pages = paginated.num_pages
+        objects_count = paginated.count
+
+        serializer = self.serializer_class(
+            paged_data,
+            many=True,
+            context={"request": request},
+        )
+        return Response(
+            {"results": serializer.data,
+            "has_next": has_next, 
+            "num_pages": num_pages,
+            "count": objects_count
+            })
+
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
